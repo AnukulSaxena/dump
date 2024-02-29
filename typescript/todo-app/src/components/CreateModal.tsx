@@ -1,9 +1,14 @@
 import todoService from "../todoService/todoService.ts";
+import { useMyContext } from "./MyContext.tsx";
 import NewInput from "./NewInput";
 
-const CreateModal = () => {
+const CreateModal = ({ setIsOpen }: any) => {
+  const { id, setData } = useMyContext();
   function handleData(inputData: string): void {
-    todoService.createTodo({ title: inputData });
+    todoService
+      .createTodo({ title: inputData, owner: id })
+      .then((response) => setData((prevData) => [...prevData, response.data]))
+      .then(() => setIsOpen((prev: any) => !prev));
   }
   return (
     <div className="bg-neutral-800 backdrop-blur-sm flex justify-center items-center bg-opacity-40 fixed inset-0">
