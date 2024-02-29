@@ -31,14 +31,49 @@ class TodoService {
     }
   }
 
-  async getTodos(ownerId: string = "") {
+  async getTodos(owner: string = "Default") {
     try {
       const response = await this.axiosInstance.get("/todos", {
-        params: { owner: ownerId },
+        params: { owner },
       });
       return response.data;
     } catch (error) {
       console.error("Error getting todo:", error);
+    }
+  }
+
+  async deleteTodos(todoId: string) {
+    try {
+      const response = await this.axiosInstance.delete(`/todos/${todoId}`);
+      console.log(response);
+    } catch (error) {
+      console.error("Error deleting todo:", error);
+    }
+  }
+
+  async deleteSingleTodo(todoId: string, index: number) {
+    try {
+      const response = await this.axiosInstance.delete(
+        `/todos/todo/${todoId}`,
+        {
+          params: { index: index },
+        }
+      );
+      console.log(response);
+    } catch (error) {
+      console.error("Error deleting todo:", error);
+    }
+  }
+
+  async createSingleTodo(todo: string, todoId: string) {
+    console.log(todo, todoId);
+    try {
+      const response = await this.axiosInstance.post(`/todos/todo/${todoId}`, {
+        todo,
+      });
+      console.log("Todo created:", response.data);
+    } catch (error) {
+      console.error("Error creating todo:", error);
     }
   }
 

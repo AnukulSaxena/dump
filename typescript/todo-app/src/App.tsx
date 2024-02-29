@@ -1,7 +1,7 @@
 // App.tsx
 import { useEffect } from "react";
 import Header from "./components/Header/Header";
-import Todos from "./components/Todos";
+import Todos from "./components/Todo/Todos";
 import todoService from "./todoService/todoService";
 import { useMyContext } from "./components/MyContext";
 

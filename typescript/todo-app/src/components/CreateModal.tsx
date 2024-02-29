@@ -6,7 +6,7 @@ const CreateModal = ({ setIsOpen }: any) => {
   const { id, setData } = useMyContext();
   function handleData(inputData: string): void {
     todoService
-      .createTodo({ title: inputData, owner: id })
+      .createTodo({ title: inputData, owner: id.trim() ? id : "Default" })
       .then((response) => setData((prevData) => [...prevData, response.data]))
       .then(() => setIsOpen((prev: any) => !prev));
   }

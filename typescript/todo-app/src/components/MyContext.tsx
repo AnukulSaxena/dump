@@ -19,7 +19,7 @@ export const MyContextProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [data, setData] = useState<TodoType[]>([]);
-  const [id, setId] = useState<string>("");
+  const [id, setId] = useState<string>("Default");
 
   return (
     <MyContext.Provider value={{ data, setData, id, setId }}>
