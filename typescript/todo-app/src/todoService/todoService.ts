@@ -31,7 +31,7 @@ class TodoService {
     }
   }
 
-  async getTodos(owner: string = "Default") {
+  async getTodos(owner: string | null = "Default") {
     try {
       const response = await this.axiosInstance.get("/todos", {
         params: { owner },

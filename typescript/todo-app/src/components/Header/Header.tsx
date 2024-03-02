@@ -8,6 +8,7 @@ const Header = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   function handleData(inputData: string) {
     setId(inputData);
+    localStorage.setItem("todoAppId", inputData);
   }
 
   return (

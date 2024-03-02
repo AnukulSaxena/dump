@@ -3,6 +3,7 @@ import Todo from "./Todo";
 
 const Todos = () => {
   const { data, id } = useMyContext();
+  console.log(data);
 
   return (
     <>
@@ -10,7 +11,7 @@ const Todos = () => {
         id ? `${id}'s ` : ""
       }ToDos`}</h1>
       <div className=" flex gap-5 flex-wrap justify-center">
-        {data.map((todo, index) => (
+        {data?.map((todo, index) => (
           <Todo key={todo._id} todoIndex={index} todo={todo} />
         ))}
       </div>

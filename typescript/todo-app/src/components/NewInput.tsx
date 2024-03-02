@@ -11,7 +11,7 @@ const NewInput: React.FC<NewInputType> = ({
   sendData,
   className,
   buttonName = "+",
-  btnClass = "text-3xl bg-neutral-800",
+  btnClass = "text-3xl bg-neutral-800 text-white",
   inputClass,
 }) => {
   const [inputData, setInputData] = useState("");
@@ -35,7 +35,7 @@ const NewInput: React.FC<NewInputType> = ({
       />
       <button
         onClick={handleClick}
-        className={`pb-1 w-14 text-white rounded-r-sm active:scale-95  ${btnClass}`}
+        className={`pb-1 w-14  rounded-r-sm active:scale-95  ${btnClass}`}
       >
         {buttonName}
       </button>
