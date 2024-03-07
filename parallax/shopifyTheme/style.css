@@ -1,0 +1,110 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background: #f9f9f9;
+  overflow-x: hidden;
+}
+
+header {
+  z-index: 100;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5rem;
+  color: beige;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: burlywood;
+}
+
+.navigation a {
+  text-decoration: none;
+  color: beige;
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0 1rem;
+}
+
+.header-logo {
+  text-align: center;
+  font-size: 2rem;
+  width: 10rem;
+}
+
+.first-section {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow-y: hidden;
+  display: flex;
+  justify-content: end;
+  align-items: center;
+}
+.first-section img {
+  z-index: 0;
+  width: 100%;
+  position: absolute;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  top: -100px;
+}
+
+.second-section {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+}
+section div {
+  font-size: 2rem;
+  margin-right: 15rem;
+  display: flex;
+  align-items: end;
+  flex-direction: column;
+  color: beige;
+  z-index: 100;
+  height: 10rem;
+  width: fit-content;
+}
+
+.second-section .title {
+  height: 40%;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  color: #333;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.title p {
+  font-size: 24px;
+}
+
+.second-section .images {
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  height: 60%;
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  gap: 5rem;
+}
+.images img {
+  height: 100%;
+}

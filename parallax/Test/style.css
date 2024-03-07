@@ -1,0 +1,212 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+/* .madimi-one-regular {
+  font-family: "Madimi One", sans-serif;
+  font-weight: 400;
+  font-size: 4em;
+  font-style: normal;
+} */
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.align-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.parallax-wrapper {
+  height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  perspective: 100px;
+}
+
+.parallax-group {
+  position: relative;
+
+  height: 100vh;
+  transform-style: preserve-3d;
+}
+
+.parallax-layer {
+  position: absolute;
+  inset: 0;
+}
+
+#group-1 > .base-layer {
+  transform: translateZ(-100px);
+  scale: 2.01;
+  background-image: url("https://parallax-theme-aspen.myshopify.com/cdn/shop/files/banner-boots_2000x.jpg");
+  background-position: center center;
+  background-size: cover;
+}
+
+.top-layer {
+  font-size: 2rem;
+  color: white;
+  text-align: end;
+  padding-right: 15%;
+}
+
+.intro-text {
+  width: 100%;
+}
+
+@media only screen and (max-width: 768px) {
+  /* For mobile phones: */
+  [class*="top-layer"] {
+    font-size: 1rem;
+    text-align: center;
+    padding: 0;
+  }
+  [class="some-text"] {
+    height: fit-content;
+  }
+
+  [class*="some-images"] {
+    display: block;
+    height: fit-content;
+    padding: 0;
+  }
+}
+
+#group-2 {
+  background-color: white;
+  z-index: 1;
+}
+
+.some-text {
+  text-align: center;
+  height: 30%;
+}
+
+.inner-some-text > h2 {
+  font-size: 3rem;
+}
+.inner-some-text > p {
+  font-size: 2rem;
+  font-weight: lighter;
+}
+
+.some-images {
+  height: 70%;
+  display: flex;
+  padding: 0 4rem;
+}
+
+.image-container {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  padding: 0 auto;
+}
+
+.inner-image-container {
+  width: 80%;
+}
+
+.inner-image-container > img {
+  width: 100%;
+}
+
+.inner-image-container > p {
+  text-align: center;
+  font-size: 2rem;
+}
+
+#group-3 > .base-layer {
+  transform: translateZ(-100px);
+  scale: 2.01;
+  background-image: url("https://parallax-theme-aspen.myshopify.com/cdn/shop/files/noah-silliman-01Qqkfz-ck8-unsplash_2048x.jpg");
+  background-position: center center;
+  background-size: cover;
+}
+
+#group-3 {
+  height: 120vh;
+}
+
+.contact-section {
+  width: 100%;
+  height: 25%;
+  background-color: #f0ecdc;
+}
+
+.camping-section {
+  width: 100%;
+  height: 75%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+  gap: 1.5rem;
+}
+
+.camping-section > h1 {
+  font-size: 3rem;
+  padding: 0px 0px;
+}
+
+.camping-section > p {
+  font-size: 2rem;
+}
+
+.camping-section > button {
+  font-size: 1rem;
+  padding: 10px 30px;
+  background-color: royalblue;
+  color: aliceblue;
+}
+
+#group-4 {
+  background-color: white;
+  height: 80vh;
+  display: flex;
+  padding: 0 5rem;
+  z-index: 1;
+}
+
+.camp-container {
+  max-height: 100%;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  font-weight: bold;
+  font-size: 18px;
+  padding-bottom: 2rem;
+}
+
+.camp-container > img {
+  width: 100%;
+  object-fit: cover;
+}
+
+.camp-container > .camp-name {
+  font-weight: 100;
+}
+
+#group-5 {
+}
+
+#group-5 > .base-layer {
+  background-image: url("//parallax-theme-aspen.myshopify.com/cdn/shop/files/aerial-photography-of-a-mountain-640809_2048x.jpg?v=1614818816");
+  background-size: cover;
+  background-position: center center;
+  scale: 2.1;
+  transform: translateZ(-100px);
+}
+
+#group-6 {
+  background-color: blanchedalmond;
+}

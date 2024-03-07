@@ -33,7 +33,7 @@ const Todo = ({ todo, todoIndex }: TodoProp) => {
   return (
     <div
       key={todo._id}
-      className=" w-11/12 relative pt-14 lg:w-5/12 flex flex-col lg:h-[40rem] no-scrollbar overflow-y-scroll ease-in-out duration-500 rounded-md h-[30rem] bg-neutral-700"
+      className=" w-11/12 relative pt-14 md:w-5/12  lg:w-[30%] flex flex-col  no-scrollbar overflow-y-scroll ease-in-out duration-500 rounded-md h-[30rem] bg-neutral-700"
     >
       <TodoTitle todo={todo} todoIndex={todoIndex} />
       <div className="h-fit  text-lg text-center w-full">
@@ -42,9 +42,18 @@ const Todo = ({ todo, todoIndex }: TodoProp) => {
             className="w-full border-b border-neutral-400 h-10 bg-neutral-800 flex "
             key={singleTodo + index}
           >
-            <p className="  truncate bg-neutral-300 h-full w-full flex items-center px-2">
-              {singleTodo}
-            </p>
+            {singleTodo.startsWith("http") ? (
+              <a
+                href={singleTodo}
+                className="  truncate bg-neutral-300 h-full w-full flex items-center px-2"
+              >
+                {singleTodo}
+              </a>
+            ) : (
+              <p className="  truncate bg-neutral-300 h-full w-full flex items-center px-2">
+                {singleTodo}
+              </p>
+            )}
             <div
               onClick={() => {
                 handleDelete(index);

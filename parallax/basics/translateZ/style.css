@@ -1,0 +1,63 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  font-family: "Nunito", sans-serif;
+  font-size: 4em;
+  color: white;
+}
+
+.align-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.parallax-wrapper {
+  height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  perspective: 300px;
+}
+
+.intro-screen {
+  height: 100vh;
+  background-color: tomato;
+}
+
+.outro-screen {
+  height: 100vh;
+  background-color: yellowgreen;
+}
+
+.parallax-group {
+  height: 100vh;
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.parallax-layer {
+  position: absolute;
+  inset: 0;
+}
+
+#group-1 {
+  z-index: -1;
+}
+
+#group-1 > .base-layer {
+  transform: translateZ(-300px);
+  background-color: turquoise;
+  scale: 2;
+}
+
+#group-2 > .top-layer {
+  transform: translateZ(210px);
+  scale: 0.3;
+}
+
+#group-2 > .mid-layer {
+  background-color: goldenrod;
+}
