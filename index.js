@@ -58,9 +58,47 @@ const getGroupedByState = async () => {
   }
 };
 
+
+const getGroupedByDistrict = async (state) => {
+  try {
+    const result = await Office.aggregate([
+      {
+        '$match': {
+          'stateName': state
+        }
+      }, {
+        '$group': {
+          '_id': '$districtName'
+        }
+      }, {
+        '$project': {
+          '_id': 0, 
+          'district': '$_id'
+        }
+      }
+    ]);
+    return result;
+  } catch (error) {
+    console.error('Error in aggregation:', error);
+    throw error;
+  }
+};
+
 app.get('/state', async (req, res) => {
   try {
     const data = await getGroupedByState();
+    console.log(data.length);
+    res.json(data);
+  } catch (error) {
+    res.status(500).send('Error fetching grouped data');
+  }
+});
+
+app.get('/district/:state', async (req, res) => {
+  try {
+
+    const state = req.params.state;
+    const data = await getGroupedByDistrict(state);
     console.log(data.length);
     res.json(data);
   } catch (error) {
