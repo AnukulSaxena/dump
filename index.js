@@ -84,6 +84,53 @@ const getGroupedByDistrict = async (state) => {
   }
 };
 
+const getGroupedByTaluk = async (district) => {
+  try {
+    const result = await Office.aggregate(
+      [
+        {
+          $match: {
+            districtName: district
+          }
+        },
+        {
+          $group: {
+            _id: '$taluk',
+          }
+        }
+        ,{
+            $project: {
+              _id: 0,
+              taluk: "$_id",
+          }
+        } 
+      ]
+    );
+    return result;
+  } catch (error) {
+    console.error('Error in aggregation:', error);
+    throw error;
+  }
+};
+
+const getGroupedByPincode = async (taluk) => {
+  try {
+    const result = await Office.aggregate(
+      [
+        {
+          $match: {
+            taluk: taluk
+          }
+        } 
+      ]
+    );
+    return result;
+  } catch (error) {
+    console.error('Error in aggregation:', error);
+    throw error;
+  }
+};
+
 app.get('/state', async (req, res) => {
   try {
     const data = await getGroupedByState();
@@ -99,6 +146,30 @@ app.get('/district/:state', async (req, res) => {
 
     const state = req.params.state;
     const data = await getGroupedByDistrict(state);
+    console.log(data.length);
+    res.json(data);
+  } catch (error) {
+    res.status(500).send('Error fetching grouped data');
+  }
+});
+
+app.get('/taluk/:district', async (req, res) => {
+  try {
+
+    const district = req.params.district;
+    const data = await getGroupedByTaluk(district);
+    console.log(data.length);
+    res.json(data);
+  } catch (error) {
+    res.status(500).send('Error fetching grouped data');
+  }
+});
+
+app.get('/pincode/:taluk', async (req, res) => {
+  try {
+
+    const taluk = req.params.taluk;
+    const data = await getGroupedByPincode(taluk);
     console.log(data.length);
     res.json(data);
   } catch (error) {
