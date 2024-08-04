@@ -186,7 +186,7 @@ app.get('/pincode/:taluk', async (req, res) => {
 });
 
 
-router.post('/userdata', async (req, res) => {
+app.post('/userdata', async (req, res) => {
   try {
     const {  officeId } = req.body;
 
