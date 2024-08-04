@@ -188,6 +188,7 @@ app.get('/pincode/:taluk', async (req, res) => {
 
 app.post('/userdata', async (req, res) => {
   try {
+    console.log(req.body);
     const {  officeId } = req.body;
 
     // Find the office by ID
