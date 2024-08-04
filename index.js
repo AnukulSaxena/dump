@@ -212,3 +212,47 @@ app.post('/userdata', async (req, res) => {
     res.status(500).json({ message: 'An error occurred while saving user data' });
   }
 });
+
+app.get('/userdata', async (req, res) => {
+  try {
+    const users = await UserData.aggregate([
+      {
+        $lookup: {
+          from: 'offices', // The collection to join
+          localField: 'office', // The field from the input documents
+          foreignField: '_id', // The field from the documents of the "from" collection
+          as: 'office' // The name of the new array field to add to the input documents
+        }
+      },
+      {
+        $unwind: '$office' // Unwind the array to deconstruct the array field from the input documents to output a document for each element
+      }
+    ]);
+    res.json(users);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ message: 'An error occurred while fetching users' });
+  }
+});
+
+app.get('/userdata', async (req, res) => {
+  try {
+    const users = await UserData.aggregate([
+      {
+        $lookup: {
+          from: 'offices', // The collection to join
+          localField: 'office', // The field from the input documents
+          foreignField: '_id', // The field from the documents of the "from" collection
+          as: 'office' // The name of the new array field to add to the input documents
+        }
+      },
+      {
+        $unwind: '$office' // Unwind the array to deconstruct the array field from the input documents to output a document for each element
+      }
+    ]);
+    res.json(users);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ message: 'An error occurred while fetching users' });
+  }
+});
