@@ -16,6 +16,14 @@ const officeSchema = new mongoose.Schema({
 // Create a model from the schema
 const Office = mongoose.model('offices', officeSchema);
 
+// UserData schema
+const userDataSchema = new mongoose.Schema({
+  office: { type: mongoose.Schema.Types.ObjectId, ref: 'Office' }
+});
+
+// Create UserData model
+const UserData = mongoose.model('UserData', userDataSchema);
+
 // Function to connect to MongoDB
 const connectDB = async () => {
   try {
@@ -174,5 +182,31 @@ app.get('/pincode/:taluk', async (req, res) => {
     res.json(data);
   } catch (error) {
     res.status(500).send('Error fetching grouped data');
+  }
+});
+
+
+router.post('/userdata', async (req, res) => {
+  try {
+    const {  officeId } = req.body;
+
+    // Find the office by ID
+    const office = await Office.findById(officeId);
+    if (!office) {
+      return res.status(404).json({ message: 'Office not found' });
+    }
+
+    // Create a new userData document
+    const newUserData = new UserData({
+      office: office._id
+    });
+
+    // Save the userData document
+    await newUserData.save();
+
+    res.status(201).json({ message: 'User data saved successfully', data: newUserData });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'An error occurred while saving user data' });
   }
 });
