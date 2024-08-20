@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import NewInput from "../NewInput";
 import TodoTitle from "./TodoTitle";
 import todoService from "../../todoService/todoService";
