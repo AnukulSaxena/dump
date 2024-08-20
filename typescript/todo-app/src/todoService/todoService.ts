@@ -31,6 +31,18 @@ class TodoService {
     }
   }
 
+  async updateTodoList(todoList: string[],todoId:string) {
+    try {
+      const response = await this.axiosInstance.put(`/todos/todo/${todoId}`, {
+        todoList,
+      });
+      console.log("Todo created:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating todo:", error);
+    }
+  }
+
   async getTodos(owner: string | null = "Default") {
     try {
       const response = await this.axiosInstance.get("/todos", {

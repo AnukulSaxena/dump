@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import NewInput from "../NewInput";
 import TodoTitle from "./TodoTitle";
 import todoService from "../../todoService/todoService";
@@ -16,6 +16,10 @@ interface TodoProp {
 const Todo = ({ todo, todoIndex }: TodoProp) => {
   const [todoData, setTodoData] = useState(todo.todos);
 
+  const dragTodo = useRef<number>(0);
+  const draggedOverTodo = useRef<number>(0);
+  
+
   function handleData(inputData: string) {
     console.log(inputData);
     todoService.createSingleTodo(inputData, todo._id);
@@ -30,6 +34,16 @@ const Todo = ({ todo, todoIndex }: TodoProp) => {
     });
   }
 
+  function handleDragEnd(){
+    const tempTodos = [...todoData];
+    const anotherTemp = tempTodos[dragTodo.current];
+    tempTodos[dragTodo.current] = tempTodos[draggedOverTodo.current];
+    tempTodos[draggedOverTodo.current] = anotherTemp;
+    todoService.updateTodoList(tempTodos,todo._id);
+    
+    setTodoData(tempTodos)
+  }
+
   return (
     <div
       key={todo._id}
@@ -38,9 +52,13 @@ const Todo = ({ todo, todoIndex }: TodoProp) => {
       <TodoTitle todo={todo} todoIndex={todoIndex} />
       <div className="h-fit  text-lg text-center w-full">
         {todoData.map((singleTodo, index) => (
-          <div
-            className="w-full border-b border-neutral-400 h-10 bg-neutral-800 flex "
+          <div draggable
+            className="w-full border-b border-neutral-400 h-10 bg-neutral-800 flex cursor-grab"
             key={singleTodo + index}
+            onDragStart={() => dragTodo.current = index}
+            onDragEnter={() => draggedOverTodo.current = index}
+            onDragOver={(e) => e.preventDefault()}
+            onDragEnd={handleDragEnd}
           >
             {singleTodo.startsWith("http") ? (
               <a
