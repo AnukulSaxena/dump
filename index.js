@@ -25,19 +25,6 @@ const userDataSchema = new mongoose.Schema({
 // Create UserData model
 const UserData = mongoose.model('UserData', userDataSchema);
 
-// Function to connect to MongoDB
-const connectDB = async () => {
-  try {
-    await mongoose.connect('mongodb+srv://copopoco71:algore269@mymovies.gbncia4.mongodb.net/yourDatabaseName?retryWrites=true&w=majority');
-    console.log('MongoDB connected');
-  } catch (err) {
-    console.error('MongoDB connection error:', err);
-  }
-};
-
-// Call the function to connect to the database
-connectDB();
-
 // Define a route to get data from the 'offices' collection
 app.get("/", (req, res) => res.send("Express on Vercel"));
 
