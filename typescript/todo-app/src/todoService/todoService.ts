@@ -1,3 +1,4 @@
+import { DailyTask } from "@/models";
 import axios, { AxiosInstance } from "axios";
 
 interface TodoData {
@@ -28,6 +29,27 @@ class TodoService {
       return response.data;
     } catch (error) {
       console.error("Error creating todo:", error);
+    }
+  }
+
+  async createDailyTask(data: DailyTask) {
+    try {
+      const response = await this.axiosInstance.post("/daily-task", data);
+      console.log("Daily Task created:", response.data);
+      return response.data;
+    } catch (error) {
+      throw new Error("Error creating daily task");
+    }
+  }
+
+  async getOwnerDailyTasks(owner: string) {
+    try {
+      const response = await this.axiosInstance.get(`/daily-task/${owner}`);
+      console.log("Daily Task Fetched:", response.data);
+
+      return response?.data?.data || [];
+    } catch (error) {
+      throw new Error("Error creating daily task");
     }
   }
 

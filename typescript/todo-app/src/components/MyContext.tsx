@@ -11,6 +11,8 @@ interface ContextType {
   setData: React.Dispatch<React.SetStateAction<TodoType[]>>;
   id: string | null;
   setId: React.Dispatch<React.SetStateAction<string | null>>;
+  mode: string;
+  setMode: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const MyContext = createContext<ContextType | undefined>(undefined);
@@ -25,11 +27,12 @@ export const MyContextProvider: React.FC<{ children: React.ReactNode }> = ({
   }
   const [data, setData] = useState<TodoType[]>([]);
   const [id, setId] = useState<string | null>(storedData);
+  const [mode, setMode] = useState<string>("normal");
 
   useEffect(() => {}, []);
 
   return (
-    <MyContext.Provider value={{ data, setData, id, setId }}>
+    <MyContext.Provider value={{ data, setData, id, setId, mode, setMode }}>
       {children}
     </MyContext.Provider>
   );

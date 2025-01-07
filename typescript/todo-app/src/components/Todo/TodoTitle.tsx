@@ -30,7 +30,7 @@ function TodoTitle({ todo, todoIndex }: any) {
       <div
         className={`${
           isOpen ? "translate-x-full" : "translate-x-0"
-        } w-full h-full absolute flex-shrink-0 rounded-t-md inset-0 bg-neutral-400 duration-700`}
+        } w-full h-full absolute flex-shrink-0 rounded-t-md inset-0 bg-neutral-400  duration-700`}
       >
         <h1 className="text-center h-full  py-2 px-4 text-2xl font-semibold   font-mono">
           {todo.title}

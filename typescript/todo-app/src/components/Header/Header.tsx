@@ -1,15 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMyContext } from "../MyContext";
 import NewInput from "../NewInput";
 import CreateModal from "../CreateModal";
+import { Button } from "@/components/ui/button";
+import DailyTaskModal from "../DailyTaskModal";
 
 const Header = () => {
-  const { setId } = useMyContext();
+  const { setId, mode } = useMyContext();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   function handleData(inputData: string) {
     setId(inputData);
     localStorage.setItem("todoAppId", inputData);
   }
+  useEffect(() => {
+
+  }, [mode]);
 
   return (
     <>
@@ -26,14 +31,23 @@ const Header = () => {
         </div>
 
         <div className="h-full w-fit flex  items-center  ">
-          <button
-            onClick={(): void => {
-              setIsOpen((prev) => !prev);
-            }}
-            className=" w-24 md:w-40 rounded-sm  bg-neutral-300  hover:scale-110 ease-in duration-200 active:scale-105 "
-          >
-            {isOpen ? "Close" : "Create"}
-          </button>
+          {mode === "normal" && (
+            <Button
+              className="w-24"
+              onClick={(): void => {
+                setIsOpen((prev) => !prev);
+              }}
+            >
+              {isOpen ? "Close" : "Create"}
+            </Button>
+          )}
+
+          {
+            mode === "daily" && (
+             <DailyTaskModal/>
+              
+            )
+          }
         </div>
       </div>
     </>

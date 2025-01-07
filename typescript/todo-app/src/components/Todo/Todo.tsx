@@ -47,7 +47,7 @@ const Todo = ({ todo, todoIndex }: TodoProp) => {
   return (
     <div
       key={todo._id}
-      className=" w-11/12 relative pt-14 md:w-5/12  lg:w-[30%] flex flex-col  no-scrollbar overflow-y-scroll ease-in-out duration-500 rounded-md h-[30rem] bg-neutral-700"
+      className=" w-11/12 relative text-neutral-700 pt-14 md:w-5/12  lg:w-[30%] flex flex-col  no-scrollbar overflow-y-scroll ease-in-out duration-500 rounded-md h-[30rem] bg-neutral-700"
     >
       <TodoTitle todo={todo} todoIndex={todoIndex} />
       <div className="h-fit  text-lg text-center w-full">
