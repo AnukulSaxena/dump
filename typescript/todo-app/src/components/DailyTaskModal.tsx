@@ -26,6 +26,7 @@ const DailyTaskModal = () => {
       queryKey: ["dailyTasks", id],
       queryFn: () => todoService.getOwnerDailyTasks(id || ""),
       enabled: !!id, 
+      refetchOnWindowFocus: false
     }
   );
 
