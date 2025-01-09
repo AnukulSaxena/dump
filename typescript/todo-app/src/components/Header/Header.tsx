@@ -12,9 +12,7 @@ const Header = () => {
     setId(inputData);
     localStorage.setItem("todoAppId", inputData);
   }
-  useEffect(() => {
-
-  }, [mode]);
+  useEffect(() => {}, [mode]);
 
   return (
     <>
@@ -42,12 +40,7 @@ const Header = () => {
             </Button>
           )}
 
-          {
-            mode === "daily" && (
-             <DailyTaskModal/>
-              
-            )
-          }
+          {mode === "daily" && <DailyTaskModal />}
         </div>
       </div>
     </>

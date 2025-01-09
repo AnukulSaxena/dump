@@ -12,36 +12,59 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import todoService from "@/todoService/todoService";
 import { useMyContext } from "./MyContext";
-import { DailyTaskArraySchema, DailyTaskWithId, DailyTaskWithIdSchema } from "@/models";
+import { DailyTaskWithId } from "@/models";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const DailyTaskModal = () => {
   const { id } = useMyContext();
+  const queryClient = useQueryClient();
 
-  const [tasks, setTasks] = useState<string[]>([]);
   const [newTask, setNewTask] = useState("");
+
+  const { data: tasks = [], isLoading, isError } = useQuery(
+    {
+      queryKey: ["dailyTasks", id],
+      queryFn: () => todoService.getOwnerDailyTasks(id || ""),
+      enabled: !!id, 
+    }
+  );
+
+  const addTaskMutation = useMutation(
+    {
+      mutationFn: (data: {newTask:string, id:string}) =>
+        todoService.createDailyTask({ owner: data.id, title: data.newTask }),
+      onSuccess: () => {
+        if(id)
+          queryClient.invalidateQueries({ queryKey: ["dailyTasks", id] }); 
+        setNewTask("");
+      },
+    }
+  
+  );
+
+  // Delete task using useMutation
+  const deleteTaskMutation = useMutation({
+    mutationFn: (task:DailyTaskWithId) => todoService.deleteDailyTask(task.owner, task._id),
+    onSuccess: () => {
+      if(id)
+        queryClient.invalidateQueries({ queryKey: ["dailyTasks", id] }); 
+      setNewTask("");
+    },
+  }
+  );
 
   const handleAddTask = () => {
     if (newTask.trim() && id) {
-      todoService
-        .createDailyTask({ owner: id, title: newTask.trim() })
-        .then((response) => {
-          console.log("Task created:", response);
-          setTasks((prevTasks) => [...prevTasks, newTask.trim()]);
-          setNewTask("");
-        });
+      addTaskMutation.mutate({
+        newTask: newTask.trim(),
+        id,
+      });
     }
   };
 
-  useEffect(() => {
-    if (id) {
-      todoService.getOwnerDailyTasks(id).then((response: DailyTaskWithId[]) => {
-        console.log("Fetched tasks:", response);
-        DailyTaskArraySchema.parse(response)
-
-        setTasks(response.map((task) => task.title));
-      });
-    }
-  },[])
+  const handleDeleteTask = (task: DailyTaskWithId) => {
+    deleteTaskMutation.mutate(task);
+  };
 
   return (
     <Dialog>
@@ -68,28 +91,31 @@ const DailyTaskModal = () => {
               placeholder="Enter a new task"
               className="flex-1"
             />
-            <Button onClick={handleAddTask}>Add Task</Button>
+            <Button
+              onClick={handleAddTask}
+              disabled={addTaskMutation.isPending}
+            >
+              {addTaskMutation.isPending ? "Adding..." : "Add Task"}
+            </Button>
           </div>
           {/* Task List */}
           <ul className="space-y-2">
-            {tasks.length === 0 && (
+            {isLoading && <p>Loading tasks...</p>}
+            {isError && <p>Error fetching tasks. Please try again.</p>}
+            {tasks.length === 0 && !isLoading && (
               <p className="text-muted-foreground">No tasks added yet.</p>
             )}
-            {tasks.map((task, index) => (
+            {tasks.map((task) => (
               <li
-                key={index}
+                key={task._id}
                 className="flex items-center justify-between bg-muted px-4 py-2 rounded-md border"
               >
-                <span>{task}</span>
-                {/* Optional: Add a delete button */}
+                <span>{task.title}</span>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() =>
-                    setTasks((prevTasks) =>
-                      prevTasks.filter((_, i) => i !== index)
-                    )
-                  }
+                  onClick={() => handleDeleteTask(task)}
+                  disabled={deleteTaskMutation.isPending}
                 >
                   Delete
                 </Button>

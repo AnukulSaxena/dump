@@ -1,4 +1,4 @@
-import { DailyTask } from "@/models";
+import { DailyTask, DailyTaskArraySchema,  } from "@/models";
 import axios, { AxiosInstance } from "axios";
 
 interface TodoData {
@@ -47,7 +47,18 @@ class TodoService {
       const response = await this.axiosInstance.get(`/daily-task/${owner}`);
       console.log("Daily Task Fetched:", response.data);
 
-      return response?.data?.data || [];
+      return DailyTaskArraySchema.parse(response?.data?.data);
+    } catch (error) {
+      throw new Error("Error creating daily task");
+    }
+  }
+
+  async deleteDailyTask(owner: string, taskId: string) {
+    try {
+      const response = await this.axiosInstance.delete(`/daily-task/${owner}/${taskId}`);
+      console.log("Daily Task Deleted:", response.data);
+
+      return response?.data || [];
     } catch (error) {
       throw new Error("Error creating daily task");
     }
