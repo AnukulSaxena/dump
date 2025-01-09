@@ -25,7 +25,7 @@ class TodoService {
         throw new Error("Invalid TodoData");
       }
       const response = await this.axiosInstance.post("/todos", data);
-      console.log("Todo created:", response.data);
+      // console.log("Todo created:", response.data);
       return response.data;
     } catch (error) {
       console.error("Error creating todo:", error);
@@ -35,7 +35,7 @@ class TodoService {
   async createDailyTask(data: DailyTask) {
     try {
       const response = await this.axiosInstance.post("/daily-task", data);
-      console.log("Daily Task created:", response.data);
+      // console.log("Daily Task created:", response.data);
       return response.data;
     } catch (error) {
       throw new Error("Error creating daily task");
@@ -45,7 +45,7 @@ class TodoService {
   async getOwnerDailyTasks(owner: string) {
     try {
       const response = await this.axiosInstance.get(`/daily-task/${owner}`);
-      console.log("Daily Task Fetched:", response.data);
+      // console.log("Daily Task Fetched:", response.data);
 
       return DailyTaskArraySchema.parse(response?.data?.data);
     } catch (error) {
@@ -56,7 +56,7 @@ class TodoService {
   async deleteDailyTask(owner: string, taskId: string) {
     try {
       const response = await this.axiosInstance.delete(`/daily-task/${owner}/${taskId}`);
-      console.log("Daily Task Deleted:", response.data);
+      // console.log("Daily Task Deleted:", response.data);
 
       return response?.data || [];
     } catch (error) {
@@ -69,7 +69,7 @@ class TodoService {
       const response = await this.axiosInstance.put(`/todos/todo/${todoId}`, {
         todoList,
       });
-      console.log("Todo created:", response.data);
+      // console.log("Todo created:", response.data);
       return response.data;
     } catch (error) {
       console.error("Error creating todo:", error);
@@ -90,7 +90,7 @@ class TodoService {
   async deleteTodos(todoId: string) {
     try {
       const response = await this.axiosInstance.delete(`/todos/${todoId}`);
-      console.log(response);
+      // console.log(response);
     } catch (error) {
       console.error("Error deleting todo:", error);
     }
@@ -104,19 +104,19 @@ class TodoService {
           params: { index: index },
         }
       );
-      console.log(response);
+      // console.log(response);
     } catch (error) {
       console.error("Error deleting todo:", error);
     }
   }
 
   async createSingleTodo(todo: string, todoId: string) {
-    console.log(todo, todoId);
+    // console.log(todo, todoId);
     try {
       const response = await this.axiosInstance.post(`/todos/todo/${todoId}`, {
         todo,
       });
-      console.log("Todo created:", response.data);
+      // console.log("Todo created:", response.data);
     } catch (error) {
       console.error("Error creating todo:", error);
     }

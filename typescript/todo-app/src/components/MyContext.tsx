@@ -21,7 +21,6 @@ export const MyContextProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const storedData = localStorage.getItem("todoAppId");
-  console.log("Stored data:", storedData);
   if (!storedData) {
     localStorage.setItem("todoAppId", "Default");
   }

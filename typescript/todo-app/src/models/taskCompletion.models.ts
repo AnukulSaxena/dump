@@ -1,18 +1,24 @@
 import { z } from "zod";
+import { DailyTaskWithIdSchema } from "./todo.models";
 
 export const TaskCompletionZodSchema = z.object({
   owner: z.string().nonempty("Owner is required"),
   taskId: z
-    .string()
-    .nonempty("Task ID is required")
-    .regex(/^[a-f\d]{24}$/, "Invalid ObjectId"),
+  .string()
+  .nonempty("Task ID is required")
+  .regex(/^[a-f\d]{24}$/, "Invalid ObjectId"),
   date: z.string().refine((date) => !isNaN(Date.parse(date)), {
     message: "Invalid date format",
   }),
 });
 
 
-export const TaskCompletionWithIdSchema = TaskCompletionZodSchema.extend({
+export const TaskCompletionWithIdSchema = z.object({
+  owner: z.string().nonempty("Owner is required"),
+  taskId: DailyTaskWithIdSchema,
+  date: z.string().refine((date) => !isNaN(Date.parse(date)), {
+    message: "Invalid date format",
+  }),
   _id: z.string(),
 });
 

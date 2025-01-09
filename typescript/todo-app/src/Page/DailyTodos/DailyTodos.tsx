@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "./DailyTodos.css";
@@ -19,8 +19,6 @@ const DailyTodos = () => {
   const { id } = useMyContext();
   const queryClient = useQueryClient();
   const [value, onChange] = useState<Value>(new Date());
-  const [dailyTasks, setDailyTasks] = useState<DailyTaskWithId[]>([]);
-  const [completedTasks, setCompletedTasks] = useState<DailyTaskWithId[]>([]);
 
   const {
     data: tasks = [],
@@ -30,59 +28,71 @@ const DailyTodos = () => {
     queryKey: ["dailyTasks", id],
     queryFn: () => todoService.getOwnerDailyTasks(id || ""),
     enabled: !!id,
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
   });
 
-  const {
-    data: taskCompletions = [],
-    isLoading: taskCompletionLoading
-  } = useQuery({
-    queryKey: ["taskCompletions", id],
-    queryFn: () => taskCompletionService.getOwnerTaskCompletions(id || "", new Date().toDateString()),
-    enabled: !!id,
-    refetchOnWindowFocus: false
+  const { data: taskCompletions = [], isLoading: taskCompletionLoading } =
+    useQuery({
+      queryKey: [
+        "taskCompletions",
+        id,
+        (value instanceof Date ? value : new Date()).toDateString(),
+      ],
+      queryFn: () =>
+        taskCompletionService.getOwnerTaskCompletions(
+          id || "",
+          (value instanceof Date ? value : new Date()).toDateString()
+        ),
+      enabled: !!id,
+      refetchOnWindowFocus: false,
+    });
+
+  const addTaskCompletionMutation = useMutation({
+    mutationFn: (data: DailyTaskWithId) =>
+      taskCompletionService.createTaskCompletion({
+        owner: data.owner,
+        taskId: data._id,
+        date: (value instanceof Date ? value : new Date()).toDateString(),
+      }),
+    onSuccess: () => {
+      if (id)
+        queryClient.invalidateQueries({ queryKey: ["taskCompletions", id] });
+    },
   });
-
-  const addTaskCompletionMutation = useMutation(
-    {
-      mutationFn: (data: DailyTaskWithId) =>
-        taskCompletionService.createTaskCompletion({ owner: data.owner, taskId: data._id, date: new Date().toString() }),
-      onSuccess: () => {
-        if (id)
-          queryClient.invalidateQueries({ queryKey: ["taskCompletions", id] });
-      },
-    }
-
-  );
-
-  console.log(taskCompletions, '00000< ----- ')
 
   const handleCheckChange = (
     checked: string | boolean,
     dailyTask: DailyTaskWithId
   ) => {
-    console.log(checked, dailyTask)
     if (checked) {
       addTaskCompletionMutation.mutate(dailyTask);
     }
   };
 
-  useEffect(() => {
-    console.log(
-      taskCompletions
-    )
-    const filteredTasks = tasks.filter(task => !taskCompletions.some((taskCompletion) => {
-      console.log(taskCompletion.taskId, task._id, taskCompletion.taskId === task._id)
-      return taskCompletion.taskId === task._id
-    }));
-    setDailyTasks(filteredTasks);
-    console.log('filterd tasks ---> ', filteredTasks)
+  const isSameDate = (date1: Date | null, date2: Date) => {
+    if (!date1) return false;
+    return (
+      date1.getFullYear() === date2.getFullYear() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getDate() === date2.getDate()
+    );
+  };
 
-    setCompletedTasks(tasks.filter(task => taskCompletions.some(taskCompletion => taskCompletion.taskId === task._id)))
-  }, [tasks, taskCompletions])
+  const dailyTasks = useMemo(() => {
+    return tasks.filter(
+      (task) =>
+        !taskCompletions.some(
+          (taskCompletion) => taskCompletion.taskId._id === task._id
+        ) && isSameDate(value instanceof Date ? value : null, new Date())
+    );
+  }, [tasks, taskCompletions]);
+
+  const completedTasks = useMemo(() => {
+    return taskCompletions.map(taskCompletion => taskCompletion.taskId)
+  }, [ taskCompletions]);
 
   return (
-    <div className="w-full p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="w-full p-6 grid grid-cols-1 md:grid-cols-2 gap-6 md:h-96">
       <div className=" w-full ">
         <Calendar
           className="custom-calendar"
@@ -90,28 +100,38 @@ const DailyTodos = () => {
           value={value}
         />
       </div>
-      <div className="w-full border border-neutral-400 p-4 rounded-sm h-full">
-        <ul className="space-y-2 ">
-          {isLoading || taskCompletionLoading && <p>Loading tasks...</p>}
-          {isError && <p>Error fetching tasks. Please try again.</p>}
-          {tasks.length === 0 && !isLoading && (
-            <p className="text-muted-foreground">No tasks added yet.</p>
-          )}
-          {!isLoading && !taskCompletionLoading && dailyTasks.map((task) => (
-            <li
-              key={task._id}
-              className=" flex gap-4 items-center bg-neutral-900  bg-muted px-4 py-2 rounded-md border"
-            >
-              <Checkbox
-                value="somevalue"
-                onCheckedChange={(e) => handleCheckChange(e, task)}
-                id={task._id}
-              />
-              <label htmlFor={task._id}>{task.title}</label>
-            </li>
-          ))}
-        </ul>
-        <Separator  className="my-4 border border-neutral-400" />
+      <div className="w-full border border-neutral-400 p-4 rounded-sm no-scrollbar overflow-y-auto">
+        {dailyTasks.length > 0 && (
+          <>
+            <h2 className="text-lg mb-2 font-semibold">Daily Tasks</h2>
+            <ul className="space-y-2 ">
+              {isLoading || (taskCompletionLoading && <p>Loading tasks...</p>)}
+              {isError && <p>Error fetching tasks. Please try again.</p>}
+              {tasks.length === 0 && !isLoading && (
+                <p className="text-muted-foreground">No tasks added yet.</p>
+              )}
+              {!isLoading &&
+                !taskCompletionLoading &&
+                dailyTasks.map((task) => (
+                  <li
+                    key={task._id}
+                    className=" flex gap-4 items-center bg-neutral-900  bg-muted px-4 py-2 rounded-md border"
+                  >
+                    <Checkbox
+                      value="somevalue"
+                      onCheckedChange={(e) => handleCheckChange(e, task)}
+                      id={task._id}
+                      disabled={addTaskCompletionMutation.isPending}
+                    />
+                    <label htmlFor={task._id}>{task.title}</label>
+                  </li>
+                ))}
+            </ul>
+            <Separator className="my-4 border border-neutral-400" />
+          </>
+        )}
+
+        <h2 className="text-lg mb-2 font-semibold">Completed Tasks</h2>
 
         <ul className="space-y-2 ">
           {/* {isLoading || taskCompletionLoading && <p>Loading tasks...</p>}
@@ -119,20 +139,22 @@ const DailyTodos = () => {
           {tasks.length === 0 && !isLoading && (
             <p className="text-muted-foreground">No tasks added yet.</p>
           )} */}
-          {!isLoading && !taskCompletionLoading && completedTasks.map((task) => (
-            <li
-              key={task._id}
-              className=" flex gap-4 items-center bg-neutral-900  bg-muted px-4 py-2 rounded-md border"
-            >
-              <Checkbox
-                disabled={true}
-                checked={true}
-                onCheckedChange={(e) => handleCheckChange(e, task)}
-                id={task._id}
-              />
-              <label htmlFor={task._id}>{task.title}</label>
-            </li>
-          ))}
+          {!isLoading &&
+            !taskCompletionLoading &&
+            completedTasks.map((task) => (
+              <li
+                key={task._id}
+                className=" flex gap-4 items-center bg-neutral-900  bg-muted px-4 py-2 rounded-md border"
+              >
+                <Checkbox
+                  disabled={true}
+                  checked={true}
+                  onCheckedChange={(e) => handleCheckChange(e, task)}
+                  id={task._id}
+                />
+                <label htmlFor={task._id}>{task.title}</label>
+              </li>
+            ))}
         </ul>
       </div>
     </div>
