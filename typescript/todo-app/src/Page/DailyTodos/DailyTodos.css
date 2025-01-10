@@ -1,10 +1,17 @@
 .custom-calendar {
     width: 100%;
     font-size: 1.5rem;
-    background-color: #171717;
     border-radius: 5px;
   }
   
   .custom-calendar .react-calendar__tile {
     height: 60px;
+  }
+
+  .default{
+    color: #807a7a;
+    border-radius: 5px;
+  }
+  .today{
+    background-color: aqua;
   }

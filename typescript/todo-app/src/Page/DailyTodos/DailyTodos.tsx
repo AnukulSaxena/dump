@@ -88,16 +88,24 @@ const DailyTodos = () => {
   }, [tasks, taskCompletions]);
 
   const completedTasks = useMemo(() => {
-    return taskCompletions.map(taskCompletion => taskCompletion.taskId)
-  }, [ taskCompletions]);
+    return taskCompletions.map((taskCompletion) => taskCompletion.taskId);
+  }, [taskCompletions]);
 
   return (
     <div className="w-full p-6 grid grid-cols-1 md:grid-cols-2 gap-6 md:h-96">
-      <div className=" w-full ">
+      <div className=" w-full text-neutral-950 ">
         <Calendar
-          className="custom-calendar"
+          className="custom-calendar bg-neutral-800"
           onChange={onChange}
           value={value}
+          tileClassName={({ date }) => {
+            const dateKey = date.toDateString();
+            return `text-neutral-400 rounded-sm ${
+              dateKey === new Date().toDateString()
+                ? "today bg-neutral-600"
+                : ""
+            }`;
+          }}
         />
       </div>
       <div className="w-full border border-neutral-400 p-4 rounded-sm no-scrollbar overflow-y-auto">
