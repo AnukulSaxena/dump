@@ -1,236 +1,78 @@
-import React, { useEffect, useState, useLayoutEffect } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  Button,
-  Tabs,
-  Tab,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  ButtonGroup,
-} from "@mui/material";
-import { attendeeTableColumns } from "../../utils/columnData";
-import { Edit, Delete, Visibility } from "@mui/icons-material";
-import DataTable from "../../components/Table/DataTable"; 
-import { getAssignments, requestReAssignment } from "../../features/actions/assign";
-import AttendeesFilterModal from "../../components/Attendees/AttendeesFilterModal";
-import { getEmployeeWebinars } from "../../features/actions/webinarContact";
-import { resetAssignedData } from "../../features/slices/assign";
-import useAddUserActivity from "../../hooks/useAddUserActivity";
-import { AssignmentStatus } from "../../utils/extra";
+Here's a list of common performance and architectural problems or concepts related to development, especially relevant to relational databases (SQL) and non-relational databases (NoSQL like MongoDB):
 
-const Assignments = () => {
-  const navigate = useNavigate();
-  const addUserActivity = useAddUserActivity();
-
-  // ----------------------- ModalNames for Redux -----------------------
-  const filterModalName = "ViewAssignmentsFilterModal";
-  const tableHeader = "Assignments Table";
-  const exportExcelModalName = "ExportViewAssignmentsExcel";
-  // ----------------------- etcetra -----------------------
-  const dispatch = useDispatch();
-
-  const [selectedRows, setSelectedRows] = useState([]);
-
-  const { userData } = useSelector((state) => state.auth);
-  const { assignData, isLoading, isSuccess, totalPages } = useSelector(
-    (state) => state.assign
-  );
-
-  const { webinarData } = useSelector((state) => state.webinarContact);
-  const LIMIT = useSelector((state) => state.pageLimits[tableHeader] || 10);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
-  const [filters, setFilters] = useState({});
-  const [currentWebinar, setCurrentWebinar] = useState("");
-  const [selected, setSelected] = useState("All");
-  const [tabValue, setTabValue] = useState(AssignmentStatus.ACTIVE);
-
-  useEffect(() => {
-    setSearchParams({ page: page });
-  }, [page]);
-
-  useEffect(() => {
-    if (currentWebinar)
-      dispatch(
-        getAssignments({
-          id: userData?._id,
-          page,
-          limit: LIMIT,
-          filters,
-          webinarId: currentWebinar,
-          validCall: selected === "All" ? undefined : selected,
-          assignmentStatus: tabValue,
-        })
-      );
-  }, [page, LIMIT, filters, selected, tabValue]);
-
-  useEffect(() => {
-    if (currentWebinar)
-      dispatch(
-        getAssignments({
-          id: userData?._id,
-          page: 1,
-          limit: LIMIT,
-          filters,
-          webinarId: currentWebinar,
-          validCall: selected === "All" ? undefined : selected,
-          assignmentStatus: tabValue,
-        })
-      );
-  }, [currentWebinar]);
-
-  useEffect(() => {
-    if (isSuccess) {
-      setSelectedRows([]);
-    }
-  }, [isSuccess]);
-
-  useLayoutEffect(() => {
-    dispatch(getEmployeeWebinars());
-    return () => {
-      dispatch(resetAssignedData());
-    };
-  }, []);
-
-  useEffect(() => {
-    if (Array.isArray(webinarData) && webinarData.length > 0) {
-      setCurrentWebinar(webinarData[0]._id);
-    }
-  }, [webinarData]);
-
-  const handleViewFullDetails = (item) => {
-    const recordType = item?.isAttended ? "postWebinar" : "preWebinar";
-    navigate(
-      `/particularContact?email=${item?.email}&attendeeId=${item?.attendeeId}`
-    );
-    dispatch(
-      addUserActivity({
-        action: "viewDetails",
-        details: `User viewed details of Attendee with Email: ${item?._id} and Record Type: ${recordType}`,
-      })
-    );
-  };
-
-  // ----------------------- Action Icons -----------------------
-
-  const actionIcons = [
-    {
-      icon: () => (
-        <Visibility className="text-indigo-500 group-hover:text-indigo-600" />
-      ),
-      tooltip: "View Attendee Info",
-      onClick: (item) => {
-        handleViewFullDetails(item);
-      },
-    },
-  ];
-
-  const AttendeeButtonGroup = () => {
-    const handleClick = (label) => {
-      setSelected(label); // Update state on button click
-    };
-    return (
-      <ButtonGroup variant="outlined" aria-label="Basic button group">
-        <Button
-          onClick={() => handleClick("All")}
-          color={selected === "All" ? "secondary" : "primary"}
-        >
-          All
-        </Button>
-        <Button
-          onClick={() => handleClick("Worked")}
-          color={selected === "Worked" ? "secondary" : "primary"}
-        >
-          Worked
-        </Button>
-        <Button
-          onClick={() => handleClick("Pending")}
-          color={selected === "Pending" ? "secondary" : "primary"}
-        >
-          Pending
-        </Button>
-      </ButtonGroup>
-    );
-  };
-  return (
-    
-
-    <div className="px-6 md:px-10 pt-10 space-y-6">
-     <Tabs
-        value={tabValue}
-        onChange={(e, newValue) => setTabValue(newValue)}
-        centered
-        className="border-b border-gray-200"
-        textColor="primary"
-        indicatorColor="primary"
-      >
-        <Tab label="Assignments" value={AssignmentStatus.ACTIVE} className="text-gray-600" />
-        <Tab label="ReAssignments" value={AssignmentStatus.REASSIGN_REQUESTED} className="text-gray-600" />
-      </Tabs>
-
-      <div className={`flex items-center gap-4 ${selectedRows.length > 0 ? "justify-between" : "justify-end"} `}>
-        {
-          selectedRows.length > 0 && (
-            <Button 
-            onClick={ () => dispatch(requestReAssignment(selectedRows)) }
-            className="h-10" variant="contained">Request ReAssignment</Button>)
-        }
-
-        <FormControl className="w-60">
-          <InputLabel id="webinar-label">Webinar</InputLabel>
-          <Select
-            labelId="webinar-label"
-            label="Webinar"
-            value={currentWebinar}
-            onChange={(e) => setCurrentWebinar(e.target.value)}
-          >
-            <MenuItem value="" disabled>
-              Select Webinar
-            </MenuItem>
-            {webinarData.map((webinar, index) => (
-              <MenuItem key={index} value={webinar._id}>
-                {webinar.webinarName}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </div>
-
-      <DataTable
-        tableHeader={tableHeader}
-        tableUniqueKey="viewAssignmentsTable"
-        ButtonGroup={AttendeeButtonGroup}
-        isSelectVisible={true}
-        filters={filters}
-        setFilters={setFilters}
-        tableData={{
-          columns: attendeeTableColumns.filter(
-            (column) => column.header !== "Assigned To"
-          ), //  { header: "Webinar", key: "webinarName", width: 20, type: "" },
-          rows: Array.isArray(assignData) ? assignData : [],
-        }}
-        actions={actionIcons}
-        totalPages={totalPages}
-        page={page}
-        setPage={setPage}
-        selectedRows={selectedRows}
-        setSelectedRows={setSelectedRows}
-        limit={LIMIT}
-        filterModalName={filterModalName}
-        exportModalName={exportExcelModalName}
-        isLoading={isLoading}
-      />
-
-      <AttendeesFilterModal
-        modalName={filterModalName}
-        filters={filters}
-        setFilters={setFilters}
-      />
-    </div>
-  );
-};
-
-export default Assignments;
+1. N+1 Query Problem
+Description: Multiple queries generated due to lazy loading.
+Solution: Use eager loading or optimized joins.
+2. Overfetching and Underfetching
+Description: Fetching more or less data than required.
+Solution: Use precise queries or GraphQL for exact data needs.
+3. Data Denormalization vs. Normalization
+Description: Denormalization improves read performance but increases storage; normalization reduces redundancy but can lead to complex joins.
+Solution: Balance based on read/write needs.
+4. Indexing Issues
+Description: Missing or excessive indexing can slow down query performance.
+Solution: Use appropriate indexes, analyze query performance.
+5. Query Locking and Deadlocks
+Description: Queries lock rows or tables, leading to potential deadlocks.
+Solution: Use proper transaction isolation levels, avoid long-running transactions.
+6. Sharding and Partitioning
+Description: Horizontal scaling can lead to uneven data distribution and hotspots.
+Solution: Use effective shard keys or partitioning strategies.
+7. Document Size Limits in MongoDB
+Description: MongoDB documents have a size limit (16MB).
+Solution: Use GridFS for large files, split large documents.
+8. Write Amplification in NoSQL
+Description: Multiple disk writes due to replication and compaction.
+Solution: Optimize write patterns and use write concerns judiciously.
+9. Cache Invalidation
+Description: Ensuring cache stays synchronized with the database.
+Solution: Use cache expiry, invalidation strategies, or read-through/write-through caching.
+10. Eventual Consistency vs. Strong Consistency
+Description: Trade-offs between consistency models in distributed databases.
+Solution: Choose based on the application’s tolerance for stale data.
+11. Schema Design Pitfalls
+Description: Poor schema design can lead to inefficient queries and storage.
+Solution: Normalize data, use appropriate data types, and avoid unnecessary fields.
+12. Data Migration Challenges
+Description: Moving data between different schemas or databases can be complex.
+Solution: Use migration tools, maintain backward compatibility.
+13. Handling Large Data Sets
+Description: Querying and processing large datasets can be resource-intensive.
+Solution: Use pagination, batching, and aggregation pipelines (MongoDB).
+14. Replication Lag
+Description: Delays in data replication between primary and secondary nodes.
+Solution: Monitor replication lag, optimize network and disk IO.
+15. Inconsistent Data Models in NoSQL
+Description: Flexible schemas can lead to inconsistent data models.
+Solution: Define clear document structures, use validation.
+16. ACID vs. BASE
+Description: Relational databases offer ACID properties, NoSQL often uses BASE (Basically Available, Soft state, Eventually consistent).
+Solution: Choose based on transactional requirements.
+17. Batch Processing vs. Real-Time Processing
+Description: Choosing between batch processing (e.g., data warehousing) and real-time processing (e.g., streaming data).
+Solution: Use based on latency requirements.
+18. Query Optimization
+Description: Poorly written queries can degrade performance.
+Solution: Use query analyzers, rewrite queries, use indexes effectively.
+19. Data Duplication in NoSQL
+Description: NoSQL encourages data duplication for performance, which can lead to update anomalies.
+Solution: Carefully manage updates and maintain consistency.
+20. Connection Pooling
+Description: High overhead due to establishing new database connections frequently.
+Solution: Use connection pooling to reuse database connections efficiently.
+21. Hotspotting in NoSQL Databases
+Description: Uneven data distribution leading to overloading specific nodes.
+Solution: Use better sharding keys, distribute data evenly.
+22. Query Execution Plans
+Description: Inefficient query execution plans can slow down performance.
+Solution: Analyze and optimize execution plans, use hints if necessary.
+23. Logging and Monitoring Overhead
+Description: Extensive logging and monitoring can degrade performance.
+Solution: Log essential information, optimize monitoring tools.
+24. Concurrency Control
+Description: Handling concurrent data access in a multi-user environment.
+Solution: Use optimistic or pessimistic locking as needed.
+25. Backup and Restore Challenges
+Description: Ensuring data integrity and availability during backups.
+Solution: Use incremental backups, automate backups, and test restores.
+Understanding and addressing these issues is crucial for building efficient, scalable, and robust applications.
