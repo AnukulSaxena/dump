@@ -1,32 +1,24 @@
 // App.tsx
-import { useEffect } from "react";
-import Header from "./components/Header/Header";
-import Todos from "./components/Todo/Todos";
-import todoService from "./todoService/todoService";
-import { useMyContext } from "./components/MyContext";
-import { ThemeProvider } from "@/components/theme-provider"
+import { Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "@/components/theme-provider";
+import Layout from "./components/Layout/Layout";
+import HomePage from "./pages/HomePage";
+import AboutPage from "./pages/AboutPage";
+import StackPage from "./pages/StackPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
-  const { id, setData } = useMyContext();
-  useEffect(() => {
-    const fetchTodos = async () => {
-      try {
-        const response = await todoService.getTodos(id);
-        setData(response.data);
-      } catch (error) {
-        console.error("Error fetching todos:", error);
-      }
-    };
-    fetchTodos();
-  }, [id]);
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-    <div className="bg-neutral-800  w-full relative text-lg py-20 min-h-screen">
-      <Header />
-      <Todos />
-    </div>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<HomePage />} />
+          <Route path="about" element={<AboutPage />} />
+          <Route path="stack" element={<StackPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
+      </Routes>
     </ThemeProvider>
-
   );
 }
 
