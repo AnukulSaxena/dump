@@ -4,9 +4,10 @@ import todoService from "../todoService/todoService";
 import { useMyContext } from "../components/MyContext";
 import { Button } from "@/components/ui/button";
 import CreateModal from "../components/CreateModal";
+import DailyTaskModal from "../components/DailyTaskModal";
 
 const HomePage = () => {
-  const { id, setData } = useMyContext();
+  const { id, setData, mode } = useMyContext();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   
   useEffect(() => {
@@ -27,12 +28,17 @@ const HomePage = () => {
       
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">My Todos</h1>
-        <Button 
-          onClick={() => setIsOpen(true)}
-          className="px-4"
-        >
-          Create Todo
-        </Button>
+        <div className="flex gap-3">
+          {mode === "daily" && <DailyTaskModal />}
+          {mode === "normal" && (
+            <Button 
+              onClick={() => setIsOpen(true)}
+              className="px-4"
+            >
+              Create Todo
+            </Button>
+          )}
+        </div>
       </div>
       
       <Todos />

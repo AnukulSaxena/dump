@@ -3,7 +3,6 @@ import { useMyContext } from "../MyContext";
 import NewInput from "../NewInput";
 import CreateModal from "../CreateModal";
 import { Button } from "@/components/ui/button";
-import DailyTaskModal from "../DailyTaskModal";
 import { Link, useLocation } from "react-router-dom";
 
 const Header = () => {
@@ -40,8 +39,6 @@ const Header = () => {
           <Link to="/stack">
             <Button variant="outline" className="w-24">Stack</Button>
           </Link>
-          
-          {isHomePage && mode === "daily" && <DailyTaskModal />}
         </div>
       </div>
     </>
