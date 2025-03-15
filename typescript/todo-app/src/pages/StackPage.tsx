@@ -1,39 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { useLocation } from 'react-router-dom';
-
-interface StackTrace {
-  id: string;
-  title: string;
-  content: string;
-  timestamp: string;
-}
-
-const initialStackTraces: StackTrace[] = [
-  {
-    id: '1',
-    title: 'React Router Integration',
-    content: 'Error: Cannot find module \'react-router-dom\'\n  at Function.Module._resolveFilename (node:internal/modules/cjs/loader:1075:15)\n  at Function.Module._load (node:internal/modules/cjs/loader:920:27)\n  at Module.require (node:internal/modules/cjs/loader:1141:19)\n  at require (node:internal/modules/helpers:110:18)\n  at Object.<anonymous> (/app/src/main.tsx:3:1)',
-    timestamp: '2023-07-15 14:32:45'
-  },
-  {
-    id: '2',
-    title: 'Context API Implementation',
-    content: 'TypeError: Cannot read properties of undefined (reading \'id\')\n  at HomePage (/app/src/pages/HomePage.tsx:12:29)\n  at renderWithHooks (/app/node_modules/react-dom/cjs/react-dom.development.js:16305:18)\n  at mountIndeterminateComponent (/app/node_modules/react-dom/cjs/react-dom.development.js:20074:13)',
-    timestamp: '2023-07-16 09:15:22'
-  },
-  {
-    id: '3',
-    title: 'Tailwind Configuration',
-    content: 'Error: PostCSS plugin tailwindcss requires PostCSS 8.\n  at Object.<anonymous> (/app/node_modules/tailwindcss/lib/index.js:15:23)\n  at Module._compile (node:internal/modules/cjs/loader:1256:14)\n  at Module._extensions..js (node:internal/modules/cjs/loader:1310:10)',
-    timestamp: '2023-07-17 11:45:33'
-  }
-];
+import { useStackItems, useCreateStackItem, useUpdateStackItem, useDeleteStackItem } from '@/hooks/useStackItems';
+import { StackItem } from '@/todoService/stackService';
+import { useMyContext } from '@/components/MyContext';
 
 const StackPage = () => {
-  // Using simple state array instead of localStorage
-  const [stackTraces, setStackTraces] = useState<StackTrace[]>(initialStackTraces);
+  const { id } = useMyContext();
+  const owner = id || 'Default';
+  
+  // Use TanStack Query hooks
+  const { data: stackTraces = [], isLoading, isError } = useStackItems(owner);
+  const createStackItemMutation = useCreateStackItem();
+  const updateStackItemMutation = useUpdateStackItem(owner);
+  const deleteStackItemMutation = useDeleteStackItem(owner);
+  
   const [showForm, setShowForm] = useState(false);
+  const [editingItem, setEditingItem] = useState<StackItem | null>(null);
   const location = useLocation();
   const formRef = useRef<HTMLDivElement>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -67,29 +50,72 @@ const StackPage = () => {
   }, [location.search]);
   
   const handleAddStackTrace = () => {
-    if (newStackTrace.title.trim() === '' || newStackTrace.content.trim() === '') {
+    if (newStackTrace.title.trim() === '' || newStackTrace.content.trim() === '' || !owner) {
       return;
     }
     
-    const newTrace: StackTrace = {
-      id: Date.now().toString(),
-      title: newStackTrace.title,
-      content: newStackTrace.content,
-      timestamp: new Date().toLocaleString()
-    };
+    if (editingItem) {
+      // Update existing stack item
+      updateStackItemMutation.mutate({
+        id: editingItem._id || '',
+        updates: {
+          title: newStackTrace.title,
+          content: newStackTrace.content
+        }
+      }, {
+        onSuccess: () => {
+          setNewStackTrace({ title: '', content: '' });
+          setShowForm(false);
+          setEditingItem(null);
+        }
+      });
+    } else {
+      // Create new stack item
+      createStackItemMutation.mutate({
+        title: newStackTrace.title,
+        content: newStackTrace.content,
+        owner
+      }, {
+        onSuccess: () => {
+          setNewStackTrace({ title: '', content: '' });
+          setShowForm(false);
+        }
+      });
+    }
+  };
+  
+  const handleEditStackTrace = (trace: StackItem) => {
+    setEditingItem(trace);
+    setNewStackTrace({
+      title: trace.title,
+      content: trace.content
+    });
+    setShowForm(true);
     
-    // Add new trace to the beginning of the array
-    setStackTraces([newTrace, ...stackTraces]);
-    setNewStackTrace({ title: '', content: '' });
-    setShowForm(false);
+    // Scroll to the form
+    setTimeout(() => {
+      if (formRef.current) {
+        formRef.current.scrollIntoView({ behavior: 'smooth' });
+        if (titleInputRef.current) {
+          titleInputRef.current.focus();
+        }
+      }
+    }, 100);
   };
   
   const handleDeleteStackTrace = (id: string) => {
-    setStackTraces(stackTraces.filter(trace => trace.id !== id));
+    deleteStackItemMutation.mutate(id);
   };
 
   const toggleForm = () => {
+    if (showForm) {
+      // If closing the form, reset the editing state
+      setEditingItem(null);
+      setNewStackTrace({ title: '', content: '' });
+    }
+    
     setShowForm(!showForm);
+    
     if (!showForm) {
       setTimeout(() => {
         if (formRef.current) {
@@ -120,10 +146,12 @@ const StackPage = () => {
           <h2 className="text-2xl font-semibold">Saved Traces ({stackTraces.length})</h2>
         </div>
         
-        {/* Add New Stack Trace Form */}
+        {/* Add/Edit Stack Trace Form */}
         {showForm && (
           <div ref={formRef} className="bg-neutral-700 rounded-lg p-6 shadow-md mb-8 border-2 border-blue-500">
-            <h3 className="text-xl font-medium mb-4">Add New Stack Trace</h3>
+            <h3 className="text-xl font-medium mb-4">
+              {editingItem ? "Edit Stack Trace" : "Add New Stack Trace"}
+            </h3>
             <div className="space-y-4">
               <div>
                 <label htmlFor="traceTitle" className="block text-sm font-medium mb-1">Title</label>
@@ -152,11 +180,14 @@ const StackPage = () => {
                 <Button 
                   onClick={handleAddStackTrace}
                   className="flex-1"
+                  disabled={createStackItemMutation.isPending || updateStackItemMutation.isPending}
                 >
-                  Add Stack Trace
+                  {editingItem 
+                    ? (updateStackItemMutation.isPending ? "Updating..." : "Update Stack Trace") 
+                    : (createStackItemMutation.isPending ? "Adding..." : "Add Stack Trace")}
                 </Button>
                 <Button 
-                  onClick={() => setShowForm(false)}
+                  onClick={toggleForm}
                   variant="outline"
                   className="flex-1"
                 >
@@ -167,37 +198,64 @@ const StackPage = () => {
           </div>
         )}
         
+        {/* Loading and Error States */}
+        {isLoading && (
+          <div className="bg-neutral-700 rounded-lg p-6 text-center">
+            <p className="text-neutral-300">Loading stack traces...</p>
+          </div>
+        )}
+        
+        {isError && (
+          <div className="bg-red-900/30 rounded-lg p-6 text-center">
+            <p className="text-red-300">Error loading stack traces. Please try again later.</p>
+          </div>
+        )}
+        
         {/* Stack Traces List */}
-        <div className="space-y-6">
-          {stackTraces.length === 0 ? (
-            <div className="bg-neutral-700 rounded-lg p-6 text-center">
-              <p className="text-neutral-300">No stack traces yet. Add one above!</p>
-            </div>
-          ) : (
-            stackTraces.map((trace) => (
-              <div key={trace.id} className="bg-neutral-700 rounded-lg overflow-hidden shadow-md">
-                <div className="bg-neutral-600 p-4 flex justify-between items-center">
-                  <div>
-                    <h3 className="font-semibold text-lg">{trace.title}</h3>
-                    <p className="text-xs text-neutral-300">{trace.timestamp}</p>
-                  </div>
-                  <Button 
-                    variant="destructive" 
-                    size="sm"
-                    onClick={() => handleDeleteStackTrace(trace.id)}
-                  >
-                    Delete
-                  </Button>
-                </div>
-                <div className="p-4">
-                  <pre className="bg-neutral-800 p-4 rounded-md overflow-x-auto text-sm font-mono whitespace-pre-wrap">
-                    {trace.content}
-                  </pre>
-                </div>
+        {!isLoading && !isError && (
+          <div className="space-y-6">
+            {stackTraces.length === 0 ? (
+              <div className="bg-neutral-700 rounded-lg p-6 text-center">
+                <p className="text-neutral-300">No stack traces yet. Add one above!</p>
               </div>
-            ))
-          )}
-        </div>
+            ) : (
+              stackTraces.map((trace) => (
+                <div key={trace._id} className="bg-neutral-700 rounded-lg overflow-hidden shadow-md">
+                  <div className="bg-neutral-600 p-4 flex justify-between items-center">
+                    <div>
+                      <h3 className="font-semibold text-lg">{trace.title}</h3>
+                      <p className="text-xs text-neutral-300">{new Date(trace.createdAt || '').toLocaleString()}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="secondary" 
+                        size="sm"
+                        onClick={() => handleEditStackTrace(trace)}
+                      >
+                        Edit
+                      </Button>
+                      <Button 
+                        variant="destructive" 
+                        size="sm"
+                        onClick={() => handleDeleteStackTrace(trace._id || '')}
+                        disabled={deleteStackItemMutation.isPending}
+                      >
+                        {deleteStackItemMutation.isPending && deleteStackItemMutation.variables === trace._id 
+                          ? "Deleting..." 
+                          : "Delete"}
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <pre className="bg-neutral-800 p-4 rounded-md overflow-x-auto text-sm font-mono whitespace-pre-wrap">
+                      {trace.content}
+                    </pre>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
